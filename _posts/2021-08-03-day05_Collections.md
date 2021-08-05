@@ -1,5 +1,6 @@
 ---
-title:  "day05_Collections"
+
+title:  "Day06_Collections"
 excerpt: " 배운내용에 대하여 정리하여 본다. "
 
 categories:
@@ -38,7 +39,7 @@ str1 == str2
 ```
 == 연산자는 stack 영역에서 가지고 있는 값이 같은지 비교한다.
 Stack 영역의 레퍼런스 변수는 heap 영역에 있는 문자를 가리키기 위해 주소 값을 가진다.
- 
+
 같은 문자열이여도 다른 객체니까 다른 객체를 가리키기 때문에 다른 주소를 가르키킨다. 그렇기 때문에 
  == 연산을 했을 때의 결과도 다르게 생성된다.
 
@@ -207,7 +208,7 @@ Try ~ catch 에 대한 예제
 		System.out.println(su1 + " "+ op+" " + su2 +" = "+result);
 		
 	}
-    ```
+```
 
 
 Exception 클래스에서 다양항 예외상황에 대한 처리기능을 제공한다.
