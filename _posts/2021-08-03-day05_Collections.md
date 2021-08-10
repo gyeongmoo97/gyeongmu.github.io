@@ -1,23 +1,20 @@
 ---
-
-title:  "Day05_Java_Collections"
-excerpt: " 배운내용에 대하여 정리하여 본다. "
-
+title: Day05_Java_Collections
+layout: single
+author_profile: true
+read_time: true
+comments: true
+share: true
+related: true
 categories:
-  - 일일 학습
-tags:
-  - [Blog, Java, Collections, Git]
+- DB
+description: .
 
+meta_keywords: java,static,memory
+last_modified_at: '2021-08-10 12:00:00 +0800'
 toc: true
 toc_sticky: true
-
-date: 2021-08-03
-last_modified_at: 2021-08-03
-
--잘못 이해한 부분이 있을 수 있습니다. 이상한 부분이 있다면 알려주세요
-
-email : mwe226@naver.com
-
+toc_label: 목차
 ---
 
 # 1. String
