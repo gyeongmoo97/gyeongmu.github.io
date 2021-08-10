@@ -20,7 +20,7 @@ title                    : "기록하는 주니어 개발자 🐮" # Meta 태그
 title_separator          : "&#124;" # 타이틀 사이 구분자 <title>Welcome to Jekyll | Minimal Mistakes</title> 해당 형식으로 들어갑니다.
 subtitle                 : "Version 1.0" # 타이틀 아래에 나올 작은 글씨 
 name                     : "GyeongMu" # 맨 하단 이름 찍히는 영역
-description              : "주니어 개발자가 배운 내용을 정리하는 블로그" # Meta 태그에 들어가는 영역 
+description              : "잘못 설명한 내용이 있는 경우 mwe226@naver.com 연락주세요 " # Meta 태그에 들어가는 영역 
 url                      : "gyeongmu.github.io" # GitBlog 호스트 주소
 baseurl                  : # subPath https://7271kim.github.io/blog라고 하고 싶을 시 "/blog" 라고 적는다.
 repository               : "gyeongmoo97/gyeongmu.github.com" # GitHub username/repo-name  
@@ -107,7 +107,7 @@ author:
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "🐱‍🚀"
   location         : "Seoul"
-  email            :
+  email            : "mwe226@naver.com"
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"

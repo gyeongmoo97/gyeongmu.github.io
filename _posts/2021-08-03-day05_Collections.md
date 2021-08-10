@@ -1,6 +1,6 @@
 ---
 
-title:  "Day06_Java_Collections"
+title:  "Day05_Java_Collections"
 excerpt: " 배운내용에 대하여 정리하여 본다. "
 
 categories:
@@ -19,8 +19,6 @@ last_modified_at: 2021-08-03
 email : mwe226@naver.com
 
 ---
-
-
 
 # 1. String
 String 클래스를 통해 문자열을 저장할 수 있다.
