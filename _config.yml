@@ -22,7 +22,7 @@ subtitle                 : "Version 1.0" # 타이틀 아래에 나올 작은 글
 name                     : "GyeongMu" # 맨 하단 이름 찍히는 영역
 description              : "잘못 설명한 내용이 있는 경우 mwe226@naver.com 연락주세요 " # Meta 태그에 들어가는 영역 
 url                      : "gyeongmu.github.io" # GitBlog 호스트 주소
-baseurl                  : # subPath https://7271kim.github.io/blog라고 하고 싶을 시 "/blog" 라고 적는다.
+baseurl                  : "/blog" # subPath https://7271kim.github.io/blog라고 하고 싶을 시 "/blog" 라고 적는다.
 repository               : "gyeongmoo97/gyeongmu.github.io" # GitHub username/repo-name  
 teaser                   : # "/assets/images/senior-couple-4723737_640.jpg" # 홈페이지 기본 티져 이미지
 logo                     : # 타이틀 옆에 작게 들어갈 이미지.
