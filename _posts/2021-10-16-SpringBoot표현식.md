@@ -701,9 +701,26 @@ java -jar war파일의이름.war 로 실행가능
 
 stand alone 은 war 안의 내장 서버 (아마 톰캣)으로 실행
 
+```
+cmd
+java -jar war파일의이름.war 
+```
 
 
-tomcat
+
+tomcat 은 
+
+webapps 에 war 파일을 삽입 (war 파일이름은 context path 가된다.)
+
+tomcat 의 bin 파일경로에서 start.bat 실행
+
+실행되면 포트번호 확인
+
+-> 포트번호/war파일의 이름
+
+
+
+
 
 
 
