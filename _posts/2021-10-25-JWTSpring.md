@@ -522,6 +522,449 @@ id 와 권한에 대한 정보를 가지고 있는 **authentication**
 
 
 
+# Cors (Cross-Origin Resource Sharing, 교차 출처 리소스 공유) 설정
+
+
+
+A 서버에서 받은 JS를 통해 B라는 서버에 접근하면 브라우저는 그것을 막는다.
+
+![image](https://user-images.githubusercontent.com/65274952/138625995-b5ec6b51-29e6-4f01-bea4-c79df1d3bc7e.png)
+
+A 가 준 JS 외의 다른 도메인에서 온 JS 가 A에 접근 가능하게 하려면 Cors 설정을 해야함
+
+
+
+## Cors 설정이 없을 때 생기는 문제
+
+외부 도메인으로 데이터를 보내려고할 때 cors 설정없으면 (기본 CORS 설정이면)어떤 에러가 날까?
+
+```javascript
+function authTest3() {
+    $.ajax({
+        // 외부 url로 데이터 보내기
+        url: "http://kosa3.iptime.org/board/test",
+        headers: {Authorization:`Bearer ${sessionStorage.getItem("jwt")}`},
+    }).done((data) => {
+        console.log(data);
+    });
+}
+```
+
+
+
+![image](https://user-images.githubusercontent.com/65274952/138626515-40f82114-0934-4408-9327-811315a6f1c5.png)
+
+cors 정책 위반으로 실패
+
+
+
+## 스프링 시큐리티 CORS 활성화 설정
+
+```java
+//CORS 설정 활성화
+http.cors();
+```
+
+이 구문이  configure에 있으면 
+
+
+
+스프링 시큐리티는 
+
+**CorsConfigurationSource** 이 객체를 찾는다.
+
+그래서 **CorsConfigurationSource** 객체는 관리빈으로 등록되어있어야한다.
+
+
+
+```java
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration conf = new CorsConfiguration();
+    //모든 요청사이트 허용
+    //모든 사이트가 현 서버로 요청 가능함
+    conf.addAllowedOrigin("*");
+
+    //모든 요청 방식 허용
+    //get put delete post 등등 요청방식 허용 
+    conf.addAllowedMethod("*");
+
+    //모든 요청 헤드 허용
+    //인증정보는 요청 헤더에 실려서 오는데 그것을 통과시켜주는 내용
+    conf.addAllowedHeader("*");
+    //		conf.addAllowedHeader("Authorization"); 
+    //이렇게 해도 괜찮다. 이거 받으려고 모든 요청해더 허용하는것
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    //모든 요청에 대해 CorsConfiguration conf 에 설정한대로 Cors 정책 변경 하겠다.
+    source.registerCorsConfiguration("/**", conf);
+
+    return source;
+}
+```
+
+
+
+##### RESTAPI인 경우 CORS 설정을 반드시 해야한다 다른 도메인에서 접근하는 경우가 아주 많기 때문이다.
+
+---
+
+
+
+# REST API를 적용한 게시판 만들기
+
+
+
+
+
+쿼리문을 통해서 회원가입
+![image](https://user-images.githubusercontent.com/65274952/138637383-95643da1-1920-436d-a82f-16e75ae397f7.png)
+
+
+
+JSON을 통해서 회원가입
+
+![image](https://user-images.githubusercontent.com/65274952/138637537-15db3596-eae1-4d5e-9ee0-59798c0c8335.png)
+
+
+
+login1 (쿼리로 로그인)
+
+![image](https://user-images.githubusercontent.com/65274952/138637665-09aa5344-ca98-490c-a96b-f66e282807a5.png)
+
+login2 (JSON 로그인)
+
+![image](https://user-images.githubusercontent.com/65274952/138637786-ca9d8dff-8f97-490e-b7f6-3620f08a82e5.png)
+
+
+
+## board 요청
+
+그냥 요청 넣으면  (헤더에 jwt 없이)
+
+![image](https://user-images.githubusercontent.com/65274952/138637881-954c7563-196d-42e1-a0b4-4e539385d3d6.png)
+
+
+
+403 에러가 발생한다
+
+![image](https://user-images.githubusercontent.com/65274952/138637888-4fa5d77b-f3bb-4f86-a086-e75f976c871c.png)
+
+권한 설정을 해준 페이지 이기 때문이다.
+
+
+
+
+
+JWT를 복사하여 Auth 헤더에 넣어서 보내주면 
+
+403 에러 없이 정상적으로 값을 받아온다 
+
+![image](https://user-images.githubusercontent.com/65274952/138638036-a546ab0b-e58f-4228-85d1-d419ae81bba7.png)
+
+
+
+
+
+## 특정 게시물 보기
+
+auth 없이 전송시 403
+![image](https://user-images.githubusercontent.com/65274952/138639660-8c6415f0-32a8-439b-bc2d-e9fed74e6e42.png)
+auth 포함
+![image](https://user-images.githubusercontent.com/65274952/138639817-a0e82de0-2f47-4e46-9ead-a5cb7278218f.png)
+
+
+
+
+
+## 게시물 생성
+
+```java
+@PostMapping("/create")
+
+// 넘어오는 데이터 title content, mid, 첨부 있을 경우 battach 넘어옴
+// 응답은 완전한 게시물을 보낼 예정.
+public Board create(Board board) {
+    log.info("실행");
+
+    // if 부분이 false 면 첨부파일이 없는 것
+    if (board.getBattach() != null && !board.getBattach().isEmpty()) {
+        // Battach 멀티파트 타입이다. 첨부가 없어도 null 이 아니다. //파일이 없어도 Battach는 생성이된다.
+        // Battach가 있는지 확인하고 (Battach없는데 파일이 있는 지 확인하려고 하면 null pointer exception)그 뒤에
+        // Battach에 파일이 있는지를 확인해야한다.
+        MultipartFile mf = board.getBattach();
+        board.setBattachoname(mf.getOriginalFilename());
+        board.setBattachsname(new Date().getTime() + "-" + mf.getOriginalFilename());
+        board.setBattachtype(mf.getContentType());
+        // 가장 중요한 파일로 저장하는 부분
+        try {
+            File file = new File("C:/hyndai/test/" + board.getBattachsname());
+            mf.transferTo(file);
+        } catch (Exception e) {
+
+        }
+    }
+    boardService.writeBoard(board);
+    // 생성 이후 생성한 게시물을 보여주는데 그걸로 조회수를 올리면 안되니까 hit ==> false
+    board = boardService.getBoard(board.getBno(), false);
+    return board;
+}
+```
+
+
+
+
+
+
+
+
+
+## 동적쿼리
+
+
+
+
+
+**boardService.writeBoard(board);** 에서 DB의 시퀀스값을 bno 로 넣어준다. 뿐만아니라 **date** 같이 DB에서 설정해야하는 값도 들어간다.
+
+ 
+
+```html
+<selectKey order="BEFORE" resultType="int" keyProperty="bno">
+    SELECT SEQ_BNO.nextval FROM dual
+</selectKey>
+```
+
+
+
+
+
+**battachoname 의 여부**에 따라 즉 첨부파일의 여부에 따라 쿼리문을 바꾼다.
+
+
+
+```html
+<insert id="insert" parameterType="board">
+    <selectKey order="BEFORE" resultType="int" keyProperty="bno">
+        SELECT SEQ_BNO.nextval FROM dual
+    </selectKey>
+    <if test="battachoname == null">
+        INSERT INTO board 
+        (bno, btitle, bcontent, mid, bdate, bhitcount)
+        VALUES
+        (#{bno}, #{btitle}, #{bcontent}, #{mid}, SYSDATE, 0)
+    </if>
+    <if test="battachoname != null">
+        INSERT INTO board 
+        (bno, btitle, bcontent, mid, bdate, bhitcount, battachoname, battachsname, battachtype)
+        VALUES 
+        (#{bno}, #{btitle}, #{bcontent}, #{mid}, sysdate, 0, #{battachoname}, #{battachsname}, #{battachtype})
+    </if>
+</insert>	
+```
+
+
+
+
+
+
+
+첨부 파일 없는 경우
+![image](https://user-images.githubusercontent.com/65274952/138642263-ef89c48a-1b47-4d91-a7f6-a94f6b60be80.png)
+
+첨부 파일 있는 경우
+![image](https://user-images.githubusercontent.com/65274952/138642244-b408522f-7fae-43a7-bf93-addf96cbf4d4.png)
+
+battach 는 DB에 저장할 값이 아님
+
+
+
+## update
+
+
+
+
+
+```java
+//multipart/form-data 로 데이터를 전송할 때에는 반드시 post 사용해야함 (put, patch 사용 불가능)
+@PostMapping("/update")
+// 원래 수정은 put 을 쓰는게 맞으나 첨부파일이 있는 경우 put patch 사용할 수 없고 post 써야한다.
+public Board update(Board board) {
+    log.info("실행");
+    // if 부분이 false 면 첨부파일이 없는 것
+    if (board.getBattach() != null && !board.getBattach().isEmpty()) {
+        MultipartFile mf = board.getBattach();
+        board.setBattachoname(mf.getOriginalFilename());
+        board.setBattachsname(new Date().getTime() + "-" + mf.getOriginalFilename());
+        board.setBattachtype(mf.getContentType());
+        // 가장 중요한 파일로 저장하는 부분
+        try {
+            File file = new File("C:/hyndai/test/" + board.getBattachsname());
+            mf.transferTo(file);
+        } catch (Exception e) {
+
+        }
+    }
+    boardService.updateBoard(board);
+    // 생성 이후 생성한 게시물을 보여주는데 그걸로 조회수를 올리면 안되니까 hit ==> false
+    board = boardService.getBoard(board.getBno(), false);
+    return board;
+}
+
+```
+
+
+
+# Delete
+
+
+
+```java
+@DeleteMapping("/{bno}")
+public Map<String, String> delete(@PathVariable int bno) {
+    boardService.removeBoard(bno);
+    log.info("실행");
+    boardService.removeBoard(bno);
+    Map<String, String> map = new HashMap<>();
+    map.put("result", "success");
+    return map;
+
+}
+```
+
+
+
+
+
+![image](https://user-images.githubusercontent.com/65274952/138646808-183ba47e-39b0-4198-ad55-a38c8a9ae44c.png)
+
+
+
+
+
+
+
+
+
+# 첨부 다운로드
+
+
+
+![image-20211025155603030](C:\Users\mwe22\AppData\Roaming\Typora\typora-user-images\image-20211025155603030.png)
+
+
+
+# img 태그로 board 사진보기
+
+## 불가피하게 요청헤더에 jwt 추가 못하는 경우 
+
+
+
+ 이미지를 요청할때는 http 헤더에 뭔가 추가할 수 없다, Authorization 헤더를 추가 못시킨다.
+그러면 에러가 난다.
+
+```html
+<img id="attachImg" class="mt-2" width="300px" src="http://localhost/board/battach/346"/>
+```
+
+결론
+
+```html
+src="http://localhost/board/battach/346?jwt=xxx"
+```
+
+쿼리스트링에 jwt를 추가하는 것 외에는 방법이 없다.
+
+
+
+불가피하게 요청헤더에 jwt 추가 못하는 경우 
+
+쿼리에 있는 jwt를 확인하게 할 수 있다.
+
+
+
+### 필터 수정
+
+
+
+무조건 요청헤더에서만 jwt 찾는다.
+
+```java
+//JWT 열기
+String jwt = null;
+if(request.getHeader("Authorization") != null &&
+   request.getHeader("Authorization").startsWith("Bearer")){
+    jwt = request.getHeader("Authorization").substring(7);
+}
+log.info("jwt : "+jwt);
+
+```
+
+
+
+
+
+요청헤더에 없다면 쿼리에서도 jwt를 찾는다.
+
+
+
+```java
+//JWT 열기
+String jwt = null;
+if(request.getHeader("Authorization") != null &&
+   request.getHeader("Authorization").startsWith("Bearer")){
+    jwt = request.getHeader("Authorization").substring(7);
+}else if(request.getParameter("jwt") !=null) {
+    jwt =request.getParameter("jwt");
+}
+```
+
+
+
+
+
+## 결론
+
+
+
+
+
+```java
+<img id="attachImg" class="mt-2" width="300px"/>
+    <!-- 이미지를 요청할때는 http 헤더에 뭔가 추가할 수 없다, Authorization 헤더를 추가 못시킨다.
+    그러면 에러가 난다. -->
+
+    <script th:inline="javascript">
+        function downloadAttach() {
+        const bno = $("#downloadAttachForm [name=bno]").val();
+        const url = "[(@{/board/battach/})]" + bno;
+        const jwt = "jwt=" + sessionStorage.getItem("jwt");
+        $("#attachImg").attr("src", `${url}?${jwt}`);
+    }
+</script>
+```
+
+
+
+
+
+# jwt 를 받는 여러가지 방법
+
+jwt 를 받는 방법은 요청 헤더에 포함된 jwt 받는게 기본이지만
+
+
+
+img 태그같이 헤더에 jwt 포함 못시키는 경우 쿼리 스트링에 포함시킨 jwt 도 받을 수 있어야한다.
+
+
+
+# home 의 이유
+
+home 은 jquery로도 rerst api 를 사용가능하다는 점을 보기 위해 사용해보았다. 
+
+
+
 
 
  {% endraw %}
+
