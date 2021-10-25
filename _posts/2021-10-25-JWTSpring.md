@@ -132,6 +132,8 @@ rest api는 브라우저 제외 여러가지 환경에서 데이터를 요청할
 
 # Collections
 
+권한이 여러개일 때를 위해서 설명
+
 ![image](https://user-images.githubusercontent.com/65274952/138619584-af88ffc6-d4dc-4f73-ab00-31009ba5b566.png)
 
 get authorities 했는데 Collection 이 반환된 상황
@@ -550,7 +552,15 @@ function authTest3() {
 }
 ```
 
+**브라우저 자체적으로 교차 출처 리소스를 막는다.** 
 
+**다른 출처는 사용할 수 없게 하는게** 
+
+**브라우저 자체의 설정이다.** 
+
+
+
+**서버 설정에 따라 , 프론트 설정에 따라 cors 정책을 변경 할 수 있다.**
 
 ![image](https://user-images.githubusercontent.com/65274952/138626515-40f82114-0934-4408-9327-811315a6f1c5.png)
 
